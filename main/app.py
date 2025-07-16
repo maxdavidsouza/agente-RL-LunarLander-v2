@@ -5,6 +5,7 @@ import gymnasium as gym
 import numpy as np
 import random
 import time
+from collections import deque  # Para janela móvel
 
 # CRIANDO O AMBIENTE DE TESTE COM O GYMNASIUM
 env = gym.make("LunarLander-v2")
@@ -17,20 +18,36 @@ acoes_nome = {
     3: "Motor direito"
 }
 
-
 # DEFININDO OS HIPERPARÂMETROS DO ALGORITMO DE APRENDIZADO
 alpha = 0.1            # taxa de aprendizado
 gamma = 0.99           # fator de desconto
 epsilon = 1.0          # taxa de exploração inicial
-epsilon_decay = 0.995  # redução de exploração a cada episódio
 epsilon_min = 0.01     # exploração mínima
-n_treinos = 200      # episódios de treinamento
+n_treinos = 200        # episódios de treinamento
 
-# DISCRETIZANDO O ESPAÇO DE AÇÕES POSSÍVEIS
-n_bins = 6  # número de faixas por dimensão
+# USANDO JANELAS DE RECOMPENSA PARA DECAIMENTO ADAPTATIVO
+janela_recompensas = deque(maxlen=20)
+epsilon_decay_min = 0.99    # decaimento mínimo padrão por episódio
+epsilon_decay_max = 0.9995  # decaimento mais lento quando agente melhora
+
+# DISCRETIZAÇÃO DO ESPAÇO DE ESTADOS
+# Posição horizontal (Entre -1.5 e 1.5)
+# Posição vertical (Entre -0.5 e 1.5)
+# Velocidade horizontal (Entre -2.0 e 2.0)
+# Velocidade vertical (Entre -2.0 e 2.0)
+# Ângulo (Entre -pi e pi)
+# Velocidade angular (Entre -5.0 e 5.0)
+# Contato com o solo esquerdo (0 ou 1)
+# Contato com o solo direito (0 ou 1)
+n_bins = 8  # número de faixas por dimensão oferecidas no ambiente
 espaco_observavel = env.observation_space
+
+# FUNÇÃO PARA CRIAR BINS PERCENTIS
+def cria_bins_percentis(low, high, n_bins):
+    return np.linspace(low, high, n_bins - 1)
+
 bins = [
-    np.linspace(espaco_observavel.low[i], espaco_observavel.high[i], n_bins - 1)
+    cria_bins_percentis(espaco_observavel.low[i], espaco_observavel.high[i], n_bins)
     for i in range(espaco_observavel.shape[0])
 ]
 
@@ -77,19 +94,36 @@ for treino in range(n_treinos):
         estado = prox_estado
         recompensa_total += recompensa
 
-    # REDUÇÃO DA TAXA DE EXPLORAÇÃO
+    # ARMAZENA A RECOMPENSA TOTAL NA JANELA MÓVEL
+    janela_recompensas.append(recompensa_total)
+
+    # DECAY ADAPTATIVO DA TAXA DE EXPLORAÇÃO
+    if len(janela_recompensas) == janela_recompensas.maxlen:
+        media_recompensa = np.mean(janela_recompensas)
+        # Se a recompensa média ultrapassar um limiar, decaimento é mais lento (exploração mais conservada)
+        if media_recompensa > 50:  # Ajuste esse valor conforme o desempenho do ambiente
+            epsilon_decay = epsilon_decay_max
+        else:
+            epsilon_decay = epsilon_decay_min
+    else:
+        epsilon_decay = epsilon_decay_min
+
     if epsilon > epsilon_min:
         epsilon *= epsilon_decay
+        epsilon = max(epsilon_min, epsilon)
 
-    if (treino + 1) % 100 == 0:
+    if (treino + 1) % 50 == 0:
+        print(
+            f"\nEp {treino + 1}/{n_treinos} | Recompensa média última janela: {np.mean(janela_recompensas):.2f} | ε: {epsilon:.4f}")
+
+        # VISUALIZAÇÃO DE UMA AMOSTRA DA TABELA Q
         print(f"\n--- Tabela Q após {treino + 1} episódios ---")
-        amostra = list(tabela_q.items())[:10]
+        amostra = list(tabela_q.items())[:10]  # pega até 10 pares (estado, ação)
         for ((estado_print, acao_print), valor_q) in amostra:
             nome_acao = acoes_nome.get(acao_print, "Desconhecida")
             estado_limpo = tuple(int(x) for x in estado_print)
             print(f"Estado: {estado_limpo}, Ação: {acao_print} ({nome_acao}) - Q-Valor: {valor_q:.3f}")
         print("--------------------------------------------\n")
-        print(f"Ep {treino + 1}/{n_treinos} | Recompensa: {recompensa_total:.2f} | ε: {epsilon:.3f}")
 
 print("\nTreinamento concluído!")
 env.close()
