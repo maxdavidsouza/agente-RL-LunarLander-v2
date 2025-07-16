@@ -23,7 +23,7 @@ alpha = 0.1            # taxa de aprendizado
 gamma = 0.99           # fator de desconto
 epsilon = 1.0          # taxa de exploração inicial
 epsilon_min = 0.01     # exploração mínima
-n_treinos = 200        # episódios de treinamento
+n_treinos = 2000        # episódios de treinamento
 
 # USANDO JANELAS DE RECOMPENSA PARA DECAIMENTO ADAPTATIVO
 janela_recompensas = deque(maxlen=20)
@@ -56,7 +56,8 @@ tabela_q = {}
 
 # RETORNA UM ESTADO DISCRETIZADO
 def discretizar_estado(estado):
-    return tuple(np.digitize(s, bins[i]) for i, s in enumerate(estado))
+    estado_clipado = np.clip(estado, espaco_observavel.low, espaco_observavel.high)
+    return tuple(np.digitize(estado_clipado[i], bins[i]) for i in range(len(bins)))
 
 # RETORNA O VALOR Q
 def retorna_q(estado, acao):
@@ -86,6 +87,13 @@ for treino in range(n_treinos):
             acao = int(np.argmax(valores_q))
 
         prox_estado, recompensa, pousado, encalhado, _ = env.step(acao)
+        # SUAVIZANDO PUNIÇÕES E VALORIZANDO POUSOS OU ACIDENTES
+        recompensa = np.clip(recompensa, -100, 100)
+        if pousado:
+            recompensa += 100
+        elif encalhado:
+            recompensa -= 100
+
         finalizado = pousado or encalhado
         prox_estado = discretizar_estado(prox_estado)
 
@@ -108,13 +116,10 @@ for treino in range(n_treinos):
     else:
         epsilon_decay = epsilon_decay_min
 
-    if epsilon > epsilon_min:
-        epsilon *= epsilon_decay
-        epsilon = max(epsilon_min, epsilon)
+    # ADOTANDO A ESTRATÉGIA DE DECAIMENTO LOGÍSTICO
+    epsilon = epsilon_min + (1.0 - epsilon_min) * np.exp(-0.01 * treino)
 
-    if (treino + 1) % 50 == 0:
-        print(
-            f"\nEp {treino + 1}/{n_treinos} | Recompensa média última janela: {np.mean(janela_recompensas):.2f} | ε: {epsilon:.4f}")
+    if (treino + 1) % 100 == 0:
 
         # VISUALIZAÇÃO DE UMA AMOSTRA DA TABELA Q
         print(f"\n--- Tabela Q após {treino + 1} episódios ---")
@@ -124,6 +129,12 @@ for treino in range(n_treinos):
             estado_limpo = tuple(int(x) for x in estado_print)
             print(f"Estado: {estado_limpo}, Ação: {acao_print} ({nome_acao}) - Q-Valor: {valor_q:.3f}")
         print("--------------------------------------------\n")
+        print(f"Ep {treino + 1}/{n_treinos} | Recompensa média última janela: {np.mean(janela_recompensas):.2f} | ε: {epsilon:.4f}\n")
+
+        # INTERROMPENDO TREINOS AO ALCANÇAR UMA RECOMPENSA SATISFATÓRIA
+        if np.mean(janela_recompensas) > 200:
+            print(f"Agente aprendeu! Encerrando treino no episódio {treino + 1}")
+            break
 
 print("\nTreinamento concluído!")
 env.close()
@@ -146,6 +157,12 @@ for test in range(n_testes):
         acao = int(np.argmax(valores_q))
 
         prox_estado, recompensa, pousado, encalhado, _ = env.step(acao)
+        # SUAVIZANDO PUNIÇÕES E VALORIZANDO POUSOS OU ACIDENTES
+        recompensa = np.clip(recompensa, -100, 100)
+        if pousado:
+            recompensa += 100
+        elif encalhado:
+            recompensa -= 100
         finalizado = pousado or encalhado
         prox_estado = discretizar_estado(prox_estado)
 
