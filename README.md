@@ -1,4 +1,4 @@
-# Agente baseado em Aprendizado por Reforço - Teste de LunarLanding (v2) [Gymnasium OpenAI]
+# Agente baseado em Aprendizado por Reforço - Teste de LunarLander (v2) [Gymnasium OpenAI]
 
 Este projeto implementa um agente de aprendizado por reforço baseado no algoritmo **Q-Learning** para o ambiente **LunarLander-v2**, utilizando a biblioteca **Gymnasium**.
 
