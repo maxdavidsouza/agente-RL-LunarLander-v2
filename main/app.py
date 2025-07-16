@@ -9,13 +9,22 @@ import time
 # CRIANDO O AMBIENTE DE TESTE COM O GYMNASIUM
 env = gym.make("LunarLander-v2")
 
+# DEFININDO AS AÇÕES POSSÍVEIS DO AGENTE
+acoes_nome = {
+    0: "Ficar parado",
+    1: "Motor inferior",
+    2: "Motor esquerdo",
+    3: "Motor direito"
+}
+
+
 # DEFININDO OS HIPERPARÂMETROS DO ALGORITMO DE APRENDIZADO
 alpha = 0.1            # taxa de aprendizado
 gamma = 0.99           # fator de desconto
 epsilon = 1.0          # taxa de exploração inicial
 epsilon_decay = 0.995  # redução de exploração a cada episódio
 epsilon_min = 0.01     # exploração mínima
-n_treinos = 2000      # episódios de treinamento
+n_treinos = 200      # episódios de treinamento
 
 # DISCRETIZANDO O ESPAÇO DE AÇÕES POSSÍVEIS
 n_bins = 6  # número de faixas por dimensão
@@ -73,6 +82,13 @@ for treino in range(n_treinos):
         epsilon *= epsilon_decay
 
     if (treino + 1) % 100 == 0:
+        print(f"\n--- Tabela Q após {treino + 1} episódios ---")
+        amostra = list(tabela_q.items())[:10]
+        for ((estado_print, acao_print), valor_q) in amostra:
+            nome_acao = acoes_nome.get(acao_print, "Desconhecida")
+            estado_limpo = tuple(int(x) for x in estado_print)
+            print(f"Estado: {estado_limpo}, Ação: {acao_print} ({nome_acao}) - Q-Valor: {valor_q:.3f}")
+        print("--------------------------------------------\n")
         print(f"Ep {treino + 1}/{n_treinos} | Recompensa: {recompensa_total:.2f} | ε: {epsilon:.3f}")
 
 print("\nTreinamento concluído!")
