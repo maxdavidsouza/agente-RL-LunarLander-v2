@@ -74,6 +74,13 @@ if st.session_state.tabela_q is not None:
 
     n_bins = (4, 4, 4, 4, 4, 4, 2, 2)
     cols = st.columns(len(n_bins))
+    # Cabeçalho com nomes das dimensões
+    nomes_dims = [
+        "Posição X", "Posição Y", "Velocidade X", "Velocidade Y",
+        "Ângulo", "Vel. Angular", "Perna Esquerda", "Perna Direita"
+    ]
+    for col, nome in zip(cols, nomes_dims):
+        col.markdown(f"**{nome}**")
     estado = []
     for i, (col, bins) in enumerate(zip(cols, n_bins)):
         with col:
