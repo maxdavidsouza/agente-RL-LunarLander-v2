@@ -146,6 +146,53 @@ for treino in range(n_treinos):
 
 print("\nTreinamento concluído!")
 
+print("\nIniciando teste em tempo real com renderização e gravação de vídeo...")
+
+# Criando ambiente com renderização RGB para gravação
+video_folder = "./videos"
+env = gym.make("LunarLander-v2", render_mode="rgb_array")
+
+# Adicionando wrapper para gravação de vídeo
+env = gym.wrappers.RecordVideo(
+    env,
+    video_folder=video_folder,
+    episode_trigger=lambda ep: True,
+    name_prefix="qlearning-lander"
+)
+
+n_testes = 5
+
+for test in range(n_testes):
+    estado, _ = env.reset()
+    estado = discretizar_estado(estado)
+    finalizado = False
+    recompensa_total = 0
+    print(f"\nFase de Teste {test + 1}")
+
+    while not finalizado:
+        valores_q = [retorna_q(estado, a) for a in range(env.action_space.n)]
+        acao = int(np.argmax(valores_q))
+
+        prox_estado, recompensa, pousado, encalhado, _ = env.step(acao)
+
+        recompensa = np.clip(recompensa, -100, 100)
+        if pousado:
+            recompensa += 100
+        elif encalhado:
+            recompensa -= 100
+
+        finalizado = pousado or encalhado
+        prox_estado = discretizar_estado(prox_estado)
+
+        estado = prox_estado
+        recompensa_total += recompensa
+
+    print(f"Recompensa do Teste {test + 1}: {recompensa_total:.2f}")
+
+env.close()
+
+print(f"\n🎥 Vídeo gravado salvo na pasta: {video_folder}")
+
 # PLOTANDO O GRÁFICO DE DESEMPENHO
 plt.plot(recompensas_totais)
 plt.xlabel("Episódio")
