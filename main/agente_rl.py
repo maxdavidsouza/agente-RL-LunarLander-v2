@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 class AgenteRLQLunarLander:
     def __init__(
         self,
-        caminho_tabela_q="tabela_q.pkl",
-        diretorio_videos="videos",
+        caminho_tabela_q="main/tabela_q.pkl",
+        diretorio_videos="main/videos",
         numero_episodios=300,
         taxa_aprendizado_inicial=1.0,
         decadencia_aprendizado=0.00016,
