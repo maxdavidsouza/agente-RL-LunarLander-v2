@@ -96,7 +96,52 @@ if st.session_state.tabela_q is not None:
     st.subheader("📈 Distribuição geral dos valores Q")
     all_qs = tabela_q.reshape(-1, 4)
     flat_qs = all_qs.flatten()
+
+    # Estatísticas
+    q_min = float(np.min(flat_qs))
+    q_max = float(np.max(flat_qs))
+    q_mean = float(np.mean(flat_qs))
+    q_std = float(np.std(flat_qs))
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("🔻 Valor-Q Mínimo", f"{q_min:.3f}")
+    col2.metric("🔺 Valor-Q Máximo", f"{q_max:.3f}")
+    col3.metric("➗ Média", f"{q_mean:.3f}")
+    col4.metric("📉 Desvio Padrão", f"{q_std:.3f}")
+
+    # Histograma
+    fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
+    ax_hist.hist(flat_qs, bins=50, color='skyblue', edgecolor='black')
+    ax_hist.set_title("Histograma dos Valores Q")
+    ax_hist.set_xlabel("Valor Q")
+    ax_hist.set_ylabel("Frequência")
+    ax_hist.grid(True)
+    st.pyplot(fig_hist)
+    st.caption("Amostra dos 1000 primeiros valores Q (para análise de dispersão inicial):")
     st.line_chart(flat_qs[:1000])
+
+    st.subheader("📌 Frequência de Estados Visitados")
+
+    # Reshape da tabela para [n_estados, n_acoes]
+    all_qs = tabela_q.reshape(-1, tabela_q.shape[-1])
+
+    # Soma absoluta dos valores Q por estado (se zero, significa não visitado)
+    soma_q_por_estado = np.sum(np.abs(all_qs), axis=1)
+
+    # Contar estados visitados
+    estados_visitados = np.count_nonzero(soma_q_por_estado)
+    total_estados = soma_q_por_estado.shape[0]
+
+    st.write(
+        f"Estados visitados: **{estados_visitados}** / {total_estados} possíveis ({estados_visitados / total_estados:.2%})")
+
+    # Histograma da soma dos Q-vals por estado
+    fig, ax = plt.subplots(figsize=(8, 3))
+    ax.hist(soma_q_por_estado, bins=50, color='skyblue', edgecolor='black')
+    ax.set_title("Distribuição da soma dos Q-values por estado")
+    ax.set_xlabel("Soma absoluta dos valores Q")
+    ax.set_ylabel("Número de estados")
+    st.pyplot(fig)
 
 st.markdown("---")
 
