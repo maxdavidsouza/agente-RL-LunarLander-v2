@@ -23,10 +23,12 @@ E instale as seguintes bibliotecas:
 - Pandas
 - Numpy
 - Gymnasium[box2d] (v0.28.1 para uso do LunarLander-v2)
+- Pickle (para salvar a Tabela Q)
+- Moviepy (para salvar as gravações do ambiente LunarLander)
 
 Através do comando:
 ```bash
-pip install gymnasium[box2d] numpy pandas gymnasium==0.28.1
+pip install pygame>=2.5.2 box2d-py==2.3.5 gymnasium==0.28.1 numpy pandas moviepy pickle
 ```
 
 ## Visão Geral do Algoritmo
