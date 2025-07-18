@@ -125,12 +125,17 @@ e a ação do agente foi ficar parado, pois naquele ponto, o valor Q era satisfa
 
 - A recompensa do ambiente era ruidosa, então aplicamos suavizações e bônus/punições para pousos/acidentes.
 - A discretização facilita o uso de tabelas mas limita a resolução da política.
-- A parada antecipada ocorre quando a recompensa média dos últimos episódios ultrapassa 200.
 
 ---
 
 ## Demonstração Visual
 
-Após o treinamento, o código executa 5 testes com renderização do ambiente em tempo real. O tempo de espera entre ações é ajustado com `time.sleep(0.02)` para melhor visualização.
+<img width="1142" height="430" alt="image" src="https://github.com/user-attachments/assets/71f9c5cd-692d-403b-9cbf-6f13a8a1a812" />
+<img width="1122" height="630" alt="image" src="https://github.com/user-attachments/assets/0505792f-f92b-4a0b-a830-c6214f0db1a9" />
+<img width="1135" height="385" alt="image" src="https://github.com/user-attachments/assets/d447d0df-3ff6-49c1-b06a-5cf93d424c3c" />
+<img width="1123" height="628" alt="image" src="https://github.com/user-attachments/assets/c1670a5e-be9c-454d-b29e-6d5b26a42992" />
+<img width="1128" height="387" alt="image" src="https://github.com/user-attachments/assets/8ec92a2c-c965-4d3f-9002-b9ab8c8a4f2f" />
+<img width="1128" height="598" alt="image" src="https://github.com/user-attachments/assets/db57a0e6-ecf8-4fd2-85bf-cfa2211b8bbf" />
+<img width="1123" height="611" alt="image" src="https://github.com/user-attachments/assets/b695dd95-b4be-4f6e-ab8d-2d9ccf6bca50" />
 
 ---
