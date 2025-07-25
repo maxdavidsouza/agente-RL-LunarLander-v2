@@ -25,10 +25,12 @@ E instale as seguintes bibliotecas:
 - Gymnasium[box2d] (v0.28.1 para uso do LunarLander-v2)
 - Pickle (para salvar a Tabela Q)
 - Moviepy (para salvar as gravações do ambiente LunarLander)
+- Matplotlib (para exibir os gráficos das métricas obtidas pelo desempenho do agente)
+- Streamlit (para compactar uma interface básica para treino e visualização dos dados obtidos pelas escolhas do agente)
 
 Através do comando:
 ```bash
-pip install pygame>=2.5.2 box2d-py==2.3.5 gymnasium==0.28.1 numpy pandas moviepy pickle
+pip install pygame>=2.5.2 box2d-py==2.3.5 gymnasium==0.28.1 numpy pandas moviepy pickle streamlit matplotlib
 ```
 
 ## Visão Geral do Algoritmo
